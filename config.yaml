@@ -1,0 +1,32 @@
+project: LaTeXOCR
+exp_name: First check to learn properly
+wandb: False
+
+train:
+  n_epochs: 1
+  device: mps
+  lr: 0.0005
+  weight_path: weight
+
+model:
+  image_size:
+    x: 200
+    y: 600
+  patch_size: 50
+  dim_emb: 128
+  depth: 6
+  n_head: 4
+  dim_mlp: 256
+  max_L: 200
+
+dataset:
+  train_data_path_lst: /Users/tora/Desktop/DL/LaTeX_OCR/data/sample_output/train_filter.lst
+  valid_data_path_lst: /Users/tora/Desktop/DL/LaTeX_OCR/data/sample_output/validate_filter.lst
+  all_images_dir: /Users/tora/Desktop/DL/LaTeX_OCR/data/sample_output/images_processed
+  all_formulae_lst: /Users/tora/Desktop/DL/LaTeX_OCR/data/sample_output/formulas.norm.lst
+  vocab_txt: /Users/tora/Desktop/DL/LaTeX_OCR/data/sample_output/latex_vocab.txt
+  max_seq_length: 200
+  input_shape:
+    x: 200
+    y: 600
+  batch_size: 64

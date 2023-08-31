@@ -1,0 +1,64 @@
+7148 b'%  \\mbox{Tr}\\, \\textstyle\\frac{1}{2}\xe7%  \\left(1-i\\Gamma^{(8-N)}\\cdots\\Gamma^8\\Gamma^9%  (-\\Gamma_{11})^{n}\\right)=\\textstyle\\frac{D}{2}\\, ,%\n'
+
+7478 b'-\\frac{7}{16}\\kappa_{10}\xa5\\left(\\gamma_{P}\xa5\\lambda {\\bar \\psi}_{M}\xa5\\gamma^{P}\xa5\\epsilon^{*}\xa5-\\frac{1}{1680}\\gamma_{{P_{1}\xa5\\ldots P_{5}\xa5}\xa5}\\lambda {\\bar \\psi}_{M}\xa5\\gamma^{P_{1}\\ldots P_{5}\xa5}\xa5\\epsilon^{*}\xa5\\right)\n'
+
+11845 b'IIB~on~S^{5}\x95 \\equiv IIA~on~CP^{2} \\times S^{1}\x95\\label{duality1}\n'
+
+13040 b'\\breve{D}_{\\mu} \\equiv \\partial_{\\mu} + \\Gamma_{\\mu}, \\label{cosy}\xa5\n'
+
+14587 b'\xe7_{gh}  =-i \\ln {\\it det} \\left( g_{\\mu \\nu} \\nabla^2 + R_{\\mu \\nu} \\right)-i \\ln {\\it det} \\left( (f_1 + f_2 + 4f_3) g_{\\mu \\nu} (-g)^\\alpha\\right)\\label{GH1}\n'
+
+16542 b'q_a = Q_{a+1} - Q_a;\xa0 \\quad a = {1,2...N-1},\n'
+
+19300 b'\\begin{array}{cc}\xa5\\sigma_{z}=\\left(\\matrix{1 &0 \\cr \\cr 0 &0}\\right) &\\sigma_{\\bar{z}}=\\left(\\matrix{0 &0 \\cr \\cr 0 &1}\\right) \\\\ \\\\\xa5\\sigma_{y}=\\left(\\matrix{0 &0 \\cr \\cr i &0}\\right) &\\sigma_{\\bar{y}}=\\left(\\matrix{0 &i \\cr \\cr 0 &0}\\right) \\end{array}\xa5\n'
+
+19366 b'\\begin{pmatrix}\\{\\chi_a^*(x),\\chi_b(y)\\} \xa7\\quad \\{\\chi_a^*(x),(\\chi^b)^*(y)\\} \\\\ \\{\\chi^a(x),\\chi_b(y)\\} \xa7\\quad \\{\\chi^a(x),(\\chi^b)^*(y)\\} \\end{pmatrix}=M_{ab}(-iD(x-y))\n'
+
+19369 b'W_{A}\xa5=\\Big\\{a\\in W: {\\cal {D}}_{A}a=0\\Big\\}.\n'
+
+19449 b'S_{\\rm graviphoton}= \\int d^{4}x\xa5\\sqrt{-g}\\left[-\\frac{1}{8}g^{\\mu\\rho}\xa5g^{\\nu\\sigma}\xa5F^{(\\alpha)}_{\\mu\\nu}F^{(\\alpha)}_{\\rho\\sigma}\xa5\\right]\\int_{-\\infty}^{\\infty}dz\\, e^{-2k|z|},\n'
+
+28075 b'1=\\int\xa0{\\cal D}A^{a}_0\\;{\\widetilde{\\delta}}(-\\partial^{\\mu}A^{a}_{\\mu})\\Delta_F[{\\bf\xa0A}]\t      \\label{cinque}\n'
+
+30676 b'U_\\mu^\\nu = \\partial_\\mu y^\\nu = \\partial_\\mu [f^{\\nu\\lambda}\\partial_\\lambda H_0(y)]\xa0\xa0 \\\\\xa0 \\nonumber= \\partial_\\mu [F^{\\nu\\lambda} \\partial_\\lambda H(y)]\n'
+
+36902 b'\xa5Q={\\alpha},\\quad\\frac{eg}{\\hbar c}=\\sigma =0,\\frac{1}{2}.\\label{qd}\n'
+
+52047 b'{\\tilde{B}}({\\rm P},{\\Sigma }):=\\int_{\\Sigma}G(\\sigma ,t)\\epsilon _{\\mu \\nu  \\rho \\lambda}F^{\\rho \\lambda }(\\sigma,t )T^{\\mu }(\\sigma,t )S_{\\tau}(\\sigma,t )S^{\\tau}(\\sigma,t )\xa5d{X_{\\sigma,t }^{\\nu }}G^{-1}(\\sigma ,t)d\\sigma dt.\\label{6}\xa5\n'
+
+55436 b'S_{\\rm gravity-scalar}\xa5=\\int d^4{x}\xa5\\sqrt{-g}\\left[g^{\\mu\\nu}\xa5R_{\\mu\\nu}\xa5-\\frac{1}{2}g^{\\mu\\nu}\xa5\\partial_{\\mu}\xa5\\phi\\partial_{\\nu}\xa5\\phi \\right]\\int_{-\\infty}^{\\infty}dz\\, e^{-2k|z|},\\label{eq:gsconv}\n'
+
+57038 b'\\triangle \xe7_{2 \\infty}  = \\frac{1}{1920 \\pi^2 \\varepsilon}\\int d^4 x~ \\sqrt{G} \\left( C_{\\alpha \\beta \\mu \\nu}(G)C^{\\alpha \\beta \\mu \\nu}(G)  + \\frac{5}{2} R^2(G) \\right)\\label{D6}\n'
+
+58174 b'\\Gamma_{\\mu i}^{j}=     \\varepsilon_{i}\xa5^{\\nu}(\\frac{\\partial\\varepsilon_{\\nu}\xa5^{j}}{\\partial     x^{\\mu}\xa5} -  \\Theta_{\\mu\\nu}^{\\lambda}\\varepsilon_{\\lambda}\xa5^{j})  \\label{cosy2}\n'
+
+58214 b'\\hbar=e=G=1~~~~~~~c=1/\\alpha~~~~~~~M^{2}\x95=\\mu^{2}\x95/\\alpha\n'
+
+60770 b'{\\hat g}_{\\mu\\nu}(x,y)\xa5=g_{\\mu\\nu}(x)\xa5+A_{\\mu}\xa5^{i}K^{mi}\xa5(y)\xa5(x)A_{\\nu}\xa5^{j}\xa5(x)K^{nj}\xa5(y)g_{mn}\xa5(y)\n'
+
+61530 b'\\varphi \\, \\longrightarrow \\,\\exp \\bigl [ \\, i \\, \\left ( q_L \\, \\alpha_L \\, +\\,q_R \\, \\alpha_R \\right ) \\,\\bigr ]\\,\xca\\varphi\\label{rcharges}\n'
+
+78343 b'ds^{2} =H^{\\frac{2-d}{d}}\xa5dx^{\\mu}\xa5dx_{\\mu}\xa5+H^{2/d}\xa5(dy^{2}\xa5+y^{2}\xa5d\\Omega_{d+1}\xa5{}^{2})\xa5\n'
+
+86084 b'\\frac{i}{2h} [G,G] = - \\frac{1}{2}\xa5e^{i}\\wedge e^{j} \\epsilon_{ij} = -      \\omega\n'
+
+87478 b'\\bigl<q|\\eta;t\\bigr>=\xa1\xa1\\bigl(4\\pi \\hbar f(t) \\tilde{\\varphi}(t)\\bigr)^{-1/2}\\exp\\Bigl[\\frac{i}{\\hbar}\\frac{f(t)\\eta^{2}-2\\eta q -2(g(t)\\tilde{\\varphi}(t)-\\frac{1}{2f(t)})q^{2}}{4f(t)\\tilde{\\varphi}(t)}\\Bigr].\n'
+
+91142 b'\\partial_t v = ({\\epsilon^2 v^2 \\over 6} + v) {\\partial_x v}+ \\partial_x^3 v\xa0 \\\\= \\partial_x [{{\\epsilon^2 v^3} \\over 18} + {v^2 \\over 2 }+ \\partial_x^2 v]\n'
+
+92546 b'{\\cal E } = (S + {\\bar S})^2 \\left|- \\frac{1}{(S +\xa0{\\bar S})} +\\frac{{\\cal B}^{\\prime}}{\\cal B} \\right|^2+ \\frac{1}{3}\\left|3 + (T + {\\bar T})\\frac{H^{\\prime}(T)}{H(T)}\\right|^2-3,\\label{sdaqw12}\n'
+
+94963 b'\\label{\xa2\xaa\xab\xa0\xa4d1}\\delta_1\\L_0=F\\partial^3\\bar h\\xi+F\\partial^3\\bar b\\eta+F\\partial^3\\bar\\varphi\\xi+F\\partial^2\\bar h\\eta+F\\partial^2\\bar b\\xi+F\\partial\\bar h\\xi+h.c.\n'
+
+96422 b'\\Omega_{\\beta \\alpha c}= e_{mc}e^{\\mu}\xa5{}_{\\alpha}\xa5e^{\\nu}\xa5_{\\beta}F_{\\mu \\nu}{}^{m}\xa5\xa5\n'
+
+96498 b'\\Delta \\Gamma_{\\mu i}^{j}=     \\frac{1}{3} (\\breve{D}_{\\mu}\\epsilon_{il})\\epsilon^{lj} +      \\frac{1}{3}\\varepsilon_{\\mu}\xa5^{k}\\varepsilon_{i}\xa5^{\\nu}(\\breve{D}_{\\nu}\\epsilon_{kl})\\epsilon^{lj} +    \\varepsilon_{\\mu}\xa5^{k}\\tilde \\zeta_{(ilk)} \\epsilon^{lj}   \\label{cosy1}\n'
+
+100909 b'\\delta e_{M}\xa5{}^{A}\xa5=e_{N}\xa5{}^{A}\xa5\\partial_{M}\xa5\\xi^{N}\xa5+\\xi^{N}\xa5\\partial_{N}\xa5e_{M}\xa5{A}\n'
+
+101377 b'\\hat{{\\cal {D}}}a= e^{i}(\\partial_{i}a + \\frac{i}{h}[\\gamma_{i},a]) \\in     \\Omega_{A}\xa5^{1},\n'
+
+103460 b'\\begin{array}{lcl}p~ \\partial_{\\sigma} V^{(J)} & = & {\\displaystyle 2~\\partial_{\\tau} X^{(J)}~ \\partial_{\\sigma} X^{(J)} } \\\\ & & \\\\p~ \\partial_{\\tau}  V^{(J)} & = & {\\displaystyle \\frac{\\alpha}{\\tau^2}~\xca(X^{(J)})^2 + (\\partial_{\\tau} X^{(J)})^2+ (\\partial_{\\sigma}X^{(J)})^2 }\\end{array}\\label{50}\n'
+
+all: 103559
+converted: 103528
