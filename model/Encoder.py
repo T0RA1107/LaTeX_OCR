@@ -15,7 +15,7 @@ class TransformerEncoderBlock(nn.Module):
         self.n_head = n_head
 
         self.layer_norm_attention = nn.LayerNorm(dim_model)
-        self.attention = MultiHeadAttention(dim_model, dim_head, dim_head, dim_head, n_head)
+        self.attention = MultiHeadAttention(dim_model, dim_head, dim_head, dim_head, n_head, attention_type="LinearAttention")
 
         self.layer_norm_mlp = nn.LayerNorm(dim_model)
         self.mlp = FeedForward(dim_model, dim_mlp, dim_model)

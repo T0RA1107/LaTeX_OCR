@@ -1,8 +1,12 @@
 import torch
 from torch.utils.data import Dataset
-from torchvision.io import read_image, ImageReadMode
 import torch.nn.functional as F
-import os
+
+import zipfile
+import re
+import torch
+from torchvision.io import decode_image, ImageReadMode
+
 import random
 
 random.seed(42)
@@ -39,10 +43,18 @@ class LaTeXDataset(Dataset):
         self.images = []
         self.formula_ids = []
         self.all_images_dir = all_images_dir
-        for img in os.listdir(all_images_dir):
-            formula_id = int(img.split(".")[0])
-            self.images.append(img)
-            self.formula_ids.append(formula_id)
+        assert(all_images_dir[-4:] == ".zip")
+        with zipfile.ZipFile(all_images_dir, 'r') as z:
+            for info in z.infolist():
+                if not re.match(".*/[0-9]+.png", info.filename): continue
+                formula_id = int(re.match("(.*/)([0-9]+)(.png)", info.filename).groups()[1])
+                self.images.append(info.filename)
+                self.formula_ids.append(formula_id)
+
+        # for img in os.listdir(all_images_dir):
+        #     formula_id = int(img.split(".")[0])
+        #     self.images.append(img)
+        #     self.formula_ids.append(formula_id)
         # with open(data_path_lst, "r", newline="\n") as f:
         #     for s in f.readlines():
         #         img, formula_id = s.split(" ")
@@ -74,14 +86,10 @@ class LaTeXDataset(Dataset):
         formula_id = self.formula_ids[index]
 
         # convert image into Tensor
-        try:
-            img_tensor = read_image(path=os.path.join(self.all_images_dir, img), mode=ImageReadMode.GRAY).to(torch.float32) / 255.0
-        except:
-            print(os.path.join(self.all_images_dir, img))
-            raise RuntimeError
+        img_tensor = self.read_image_from_zip(img)
         # TODO: 形状を固定のものに変換する
         padding_base = torch.ones((1, *self.input_shape), dtype=torch.float32)
-        assert img_tensor.shape[1] <= self.input_shape[0] and img_tensor.shape[2] <= self.input_shape[1], print("image:", os.path.join(self.all_images_dir, img), "\ninput shape:", self.input_shape, "\nimage shpae:", img_tensor.shape)
+        assert img_tensor.shape[1] <= self.input_shape[0] and img_tensor.shape[2] <= self.input_shape[1], print("input shape: ", self.input_shape, "\nimage shpae: ", img_tensor.shape)
         rh = random.randint(0, self.input_shape[0] - img_tensor.shape[1])
         rw = random.randint(0, self.input_shape[1] - img_tensor.shape[2])
         padding_base[:, rh:rh + img_tensor.shape[1], rw:rw + img_tensor.shape[2]] = img_tensor[:, :, :]
@@ -106,6 +114,13 @@ class LaTeXDataset(Dataset):
 
     def __len__(self):
         return len(self.images)
+
+    def read_image_from_zip(self, filename):
+        with zipfile.ZipFile(self.all_images_dir, 'r') as z:
+            with z.open(filename) as img_file:
+                bytes_tensor = torch.as_tensor(list(img_file.read()), dtype=torch.uint8)
+                img_tensor = decode_image(bytes_tensor, mode=ImageReadMode.GRAY).to(torch.float32) / 255.0
+                return img_tensor
 
     def get_formula(self, index):
         formula_id = self.formula_ids[index]

@@ -10,6 +10,7 @@ random.seed(42)
 class LaTeXDataset(Dataset):
     def __init__(
         self,
+        data_path_lst,
         all_images_dir,
         all_formulae_lst,
         vocab_txt,
@@ -20,6 +21,8 @@ class LaTeXDataset(Dataset):
         """Generates a torch dataset by using preprocessed LaTeX images and formulae
 
         Args:
+            data_path_lst (str):
+                preprocessed data list. a set of image file name and formula id for a line.
             all_images_dir (str):
                 directory name of LaTeX images.
             all_formulae_lst (str):
@@ -39,15 +42,11 @@ class LaTeXDataset(Dataset):
         self.images = []
         self.formula_ids = []
         self.all_images_dir = all_images_dir
-        for img in os.listdir(all_images_dir):
-            formula_id = int(img.split(".")[0])
-            self.images.append(img)
-            self.formula_ids.append(formula_id)
-        # with open(data_path_lst, "r", newline="\n") as f:
-        #     for s in f.readlines():
-        #         img, formula_id = s.split(" ")
-        #         self.images.append(img)
-        #         self.formula_ids.append(int(formula_id))
+        with open(data_path_lst, "r", newline="\n") as f:
+            for s in f.readlines():
+                img, formula_id = s.split(" ")
+                self.images.append(img)
+                self.formula_ids.append(int(formula_id))
 
         self.all_formulae = list(open(all_formulae_lst, "r", newline="\n"))
         self.word2id = {
@@ -74,18 +73,14 @@ class LaTeXDataset(Dataset):
         formula_id = self.formula_ids[index]
 
         # convert image into Tensor
-        try:
-            img_tensor = read_image(path=os.path.join(self.all_images_dir, img), mode=ImageReadMode.GRAY).to(torch.float32) / 255.0
-        except:
-            print(os.path.join(self.all_images_dir, img))
-            raise RuntimeError
+        img_tensor = read_image(path=os.path.join(self.all_images_dir, img), mode=ImageReadMode.GRAY).to(torch.float32) / 255.0
         # TODO: 形状を固定のものに変換する
-        padding_base = torch.ones((1, *self.input_shape), dtype=torch.float32)
-        assert img_tensor.shape[1] <= self.input_shape[0] and img_tensor.shape[2] <= self.input_shape[1], print("image:", os.path.join(self.all_images_dir, img), "\ninput shape:", self.input_shape, "\nimage shpae:", img_tensor.shape)
+        padding_base = torch.zeros((1, *self.input_shape), dtype=torch.float32)
+        assert img_tensor.shape[1] <= self.input_shape[0] and img_tensor.shape[2] <= self.input_shape[1], print("input shape: ", self.input_shape, "\nimage shpae: ", img_tensor.shape)
         rh = random.randint(0, self.input_shape[0] - img_tensor.shape[1])
         rw = random.randint(0, self.input_shape[1] - img_tensor.shape[2])
-        padding_base[:, rh:rh + img_tensor.shape[1], rw:rw + img_tensor.shape[2]] = img_tensor[:, :, :]
-        img_tensor = padding_base
+        padding_base[:, :, rh:rh + img_tensor.shape[1], rw:rw + img_tensor.shape[2]] += img_tensor[:, :, :]
+        img_tensor = padding_base.permute(0, 2, 3, 1)
 
         # convert formula into Tensor
         formula = ("[BOS] " + self.all_formulae[formula_id].rstrip("\n") + " [EOS]").split(" ")

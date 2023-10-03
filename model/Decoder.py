@@ -17,10 +17,10 @@ class TransformerDecoderBlock(nn.Module):
         self.n_head = n_head
 
         self.layer_norm_masked_attention = nn.LayerNorm(dim_model)
-        self.masked_attention = MultiHeadAttention(dim_model, dim_head, dim_head, dim_head, n_head)
+        self.masked_attention = MultiHeadAttention(dim_model, dim_head, dim_head, dim_head, n_head, attention_type="CausalLinearAttention")
 
         self.layer_norm_cross_attention = nn.LayerNorm(dim_model)
-        self.cross_attention = MultiHeadAttention(dim_model, dim_head, dim_head, dim_head, n_head)
+        self.cross_attention = MultiHeadAttention(dim_model, dim_head, dim_head, dim_head, n_head, attention_type="LinearAttention")
 
         self.layer_norm_mlp = nn.LayerNorm(dim_model)
         self.mlp = FeedForward(dim_model, dim_mlp, dim_model)

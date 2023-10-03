@@ -1,32 +1,36 @@
 project: LaTeXOCR
-exp_name: First check to learn properly
-wandb: False
+exp_name: check train loss curve with big data
+wandb: True
 
 train:
   n_epochs: 1
   device: mps
-  lr: 0.0005
+  lr: 0.001
+  embedding_lr: 0.0001
+  save_weight: False
   weight_path: weight
+  mem_file: /Users/tora/Desktop/DL/LaTeX_OCR/mem.txt
 
 model:
   image_size:
-    x: 200
-    y: 600
+    x: 800
+    y: 800
   patch_size: 50
-  dim_emb: 128
+  dim_emb: 64
   depth: 6
   n_head: 4
-  dim_mlp: 256
+  dim_mlp: 128
   max_L: 200
+  pre_train_word_embedding: True
+  embedding_path: /Users/tora/Desktop/DL/LaTeX_OCR/embedding.bin
 
 dataset:
-  train_data_path_lst: /Users/tora/Desktop/DL/LaTeX_OCR/data/sample_output/train_filter.lst
-  valid_data_path_lst: /Users/tora/Desktop/DL/LaTeX_OCR/data/sample_output/validate_filter.lst
-  all_images_dir: /Users/tora/Desktop/DL/LaTeX_OCR/data/sample_output/images_processed
-  all_formulae_lst: /Users/tora/Desktop/DL/LaTeX_OCR/data/sample_output/formulas.norm.lst
-  vocab_txt: /Users/tora/Desktop/DL/LaTeX_OCR/data/sample_output/latex_vocab.txt
+  train_images_dir: /Users/tora/Desktop/DL/LaTeX_OCR/data/lukas-data/all2/train
+  valid_images_dir: /Users/tora/Desktop/DL/LaTeX_OCR/data/lukas-data/all2/val
+  all_formulae_lst: /Users/tora/Desktop/DL/LaTeX_OCR/data/lukas-data/all/formulae.txt
+  vocab_txt: /Users/tora/Desktop/DL/LaTeX_OCR/data/lukas-data/all2/vocab.txt
   max_seq_length: 200
   input_shape:
-    x: 200
-    y: 600
-  batch_size: 64
+    x: 800
+    y: 800
+  batch_size: 4

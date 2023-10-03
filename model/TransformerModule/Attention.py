@@ -41,6 +41,92 @@ class ScalarDotProductAttention(nn.Module):
         x = torch.sum(x * V, dim=1)  # (l_query, n_batch, n_head, d_value)
         return x
 
+class LinearAttention(nn.Module):
+    def __init__(
+        self,
+        n_head,
+        eps=1e-6
+    ):
+        super().__init__()
+        self.n_head = n_head
+        self.eps = eps
+
+    def forward(
+        self,
+        Q,
+        K,
+        V,
+        mask = None
+    ):
+        assert mask is None, "LinearAttention does not support mask"
+        l_query, n_batch, n_head, d_query = Q.shape
+        l_key, _, _, d_key = K.shape
+        l_value, _, _, d_value = V.shape
+
+        assert n_head == self.n_head, f"n_head: {n_head}, self.n_head: {self.n_head}"
+        assert d_query == d_key, f"d_query: {d_query}, d_key: {d_key}"
+        assert l_key == l_value, f"l_key: {l_key}, l_value: {l_value}"
+
+        Q = F.elu(Q) + 1
+        K = F.elu(K) + 1
+
+        Q = Q.reshape(l_query, n_batch, n_head, d_query, 1)
+        K = K.reshape(1, l_key, n_batch, n_head, d_key, 1)
+        V = V.reshape(1, l_value, n_batch, n_head, 1, d_value)
+
+        A = torch.sum(K * V, dim=1)  # (1, n_batch, n_head, d_key, d_value)
+        A = torch.sum(Q * A, dim=3)  # (l_query, n_batch, n_head, d_value)
+        B = torch.sum(K, dim=1)  # (1, n_batch, n_head, d_key, 1)
+        B = torch.sum(Q * B, dim=3)  # (l_query, n_batch, n_head, 1)
+
+        x = A / (B + self.eps)
+        return x
+
+class CausalLinearAttention(nn.Module):
+    def __init__(
+        self,
+        n_head,
+        eps=1e-6
+    ):
+        super().__init__()
+        self.n_head = n_head
+        self.eps = eps
+
+    def forward(
+        self,
+        Q,
+        K,
+        V,
+        mask = None
+    ):
+        assert mask is None
+
+        l_query, n_batch, n_head, d_query = Q.shape
+        l_key, _, _, d_key = K.shape
+        l_value, _, _, d_value = V.shape
+
+        assert n_head == self.n_head, f"n_head: {n_head}, self.n_head: {self.n_head}"
+        assert d_query == d_key, f"d_query: {d_query}, d_key: {d_key}"
+        assert l_key == l_value, f"l_key: {l_key}, l_value: {l_value}"
+
+        assert l_query == l_key, f"l_query: {l_query}, l_key: {l_key}\nCausal Linear Attention does not support non-square Attention map"
+
+        Q = F.elu(Q) + 1
+        K = F.elu(K) + 1
+
+        Q = Q.reshape(l_query, n_batch, n_head, d_query, 1)
+        K = K.reshape(l_key, n_batch, n_head, d_key, 1)
+        V = V.reshape(l_value, n_batch, n_head, 1, d_value)
+
+        A = torch.cumsum(K * V, dim=1)  # (l_key, n_batch, n_head, d_key, d_value)
+        A = torch.sum(Q * A, dim=3)  # (l_query, n_batch, n_head, d_value)
+
+        B = torch.cumsum(K, dim=1)  # (l_key, n_batch, n_head, d_key, 1)
+        B = torch.sum(Q * B, dim=3)  # (l_query, n_batch, n_head, 1)
+
+        x = A / (B + self.eps)
+        return x
+
 class MultiHeadAttention(nn.Module):
 
     def __init__(
@@ -49,7 +135,8 @@ class MultiHeadAttention(nn.Module):
         d_query,
         d_key,
         d_value,
-        n_head
+        n_head,
+        attention_type="ScalarDotProductAttention"
     ):
         super().__init__()
         assert(d_query == d_key)
@@ -59,7 +146,12 @@ class MultiHeadAttention(nn.Module):
         self.d_value = d_value
         self.n_head = n_head
 
-        self.attention = ScalarDotProductAttention(n_head)
+        if attention_type == "ScalarDotProductAttention":
+            self.attention = ScalarDotProductAttention(n_head)
+        elif attention_type == "LinearAttention":
+            self.attention = LinearAttention(n_head)
+        elif attention_type == "CausalLinearAttention":
+            self.attention = CausalLinearAttention(n_head)
 
         # for make Q, K, V into H heads
         self.project_query = nn.Linear(
