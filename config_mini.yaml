@@ -1,0 +1,36 @@
+project: LaTeXOCR(mini)
+exp_name: check train loss curve with mini data
+wandb: True
+
+train:
+  n_epochs: 50
+  device: cuda
+  lr: 0.001
+  embedding_lr: 0.0001
+  save_weight: False
+  weight_path: /home/ubuntu/LaTeX_OCR/weight
+  mem_file: /home/ubuntu/LaTeX_OCR/mem.txt
+
+model:
+  image_size:
+    x: 800
+    y: 800
+  patch_size: 50
+  dim_emb: 256
+  depth: 8
+  n_head: 6
+  dim_mlp: 128
+  max_L: 200
+  pre_train_word_embedding: True
+  embedding_path: /home/ubuntu/LaTeX_OCR/embedding_mini.bin
+
+dataset:
+  train_images_dir: /home/ubuntu/LaTeX_OCR/data/mini/train
+  valid_images_dir: /home/ubuntu/LaTeX_OCR/data/mini/val
+  all_formulae_lst: /home/ubuntu/LaTeX_OCR/data/mini/formulae.txt
+  vocab_txt: /home/ubuntu/LaTeX_OCR/data/mini/vocab.txt
+  max_seq_length: 200
+  input_shape:
+    x: 800
+    y: 800
+  batch_size: 16

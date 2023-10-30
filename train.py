@@ -18,17 +18,19 @@ class TrainManager:
     def __init__(
         self,
         train_loss_init,
-        valid_loss_init
+        valid_loss_init,
+        update_rate=0.9
     ):
         self.train_losses = []
         self.valid_losses = []
         self.train_loss_best = train_loss_init
         self.valid_loss_best = valid_loss_init
+        self.update_rate = update_rate
 
     def check_and_save_weight(self, loss_train, loss_valid):
         self.train_losses.append(loss_train)
         self.valid_losses.append(loss_valid)
-        if loss_train < self.train_loss_best and loss_valid < self.valid_loss_best:
+        if loss_train < self.train_loss_best * self.update_rate and loss_valid < self.valid_loss_best * self.update_rate:
             self.train_loss_best = loss_train
             self.valid_loss_best = loss_valid
             return True
@@ -46,15 +48,13 @@ def train(model, dataloader_train, dataloader_valid, loss_fn, optimizer, config)
         os.makedirs(save_path_dir)
     device = torch.device(config.train.device)
     model.to(device)
-    train_manager = TrainManager(0.1, 0.1)
-    test = glob.glob("/Users/tora/Desktop/DL/LaTeX_OCR/data/lukas-data/all2/test/*.png")
+    train_manager = TrainManager(2.5, 2.5)
     for epoch in tqdm(range(1, n_epochs + 1), desc="EPOCHS"):
         n_train = 0
         losses_train = []
 
         model.train()
 
-        cnt = 0
         for img, tgt in dataloader_train: # tqdm(dataloader_train, leave=False, desc="train"):
             n_train += tgt.size()[0]
             model.zero_grad()
@@ -77,21 +77,6 @@ def train(model, dataloader_train, dataloader_valid, loss_fn, optimizer, config)
             optimizer.step()
 
             losses_train.append(loss.tolist())
-            cnt += 1
-
-            print(" input:", tgt_in[:15, -1])
-            print("output:", torch.max(y, dim=-1)[1][:15, -1])
-            print("answer:", tgt_out[:15, -1])
-
-            if config.wandb:
-                loss_train = np.mean(losses_train)
-                wandb.log({
-                    'train loss': loss_train
-                })
-                if cnt % 10 == 0:
-                    torch.save(model, os.path.join(config.train.weight_path, 'check.pth'))
-                    test_img_path = random.choice(test)
-                    subprocess.run(f"python inference.py {test_img_path}", shell=True)
 
         n_valid = 0
         losses_valid = []
@@ -119,7 +104,7 @@ def train(model, dataloader_train, dataloader_valid, loss_fn, optimizer, config)
         loss_valid = np.mean(losses_valid)
         if train_manager.check_and_save_weight(loss_train, loss_valid) and config.train.save_weight:
             torch.save(model, os.path.join(save_path_dir, f'{epoch}.pth'))
-            # print("\rsave weight on", os.path.join(save_path_dir, f'{epoch}.pth'))
+            print("\rsave weight on", os.path.join(save_path_dir, f'{epoch}.pth'))
         if config.wandb:
             wandb.log({
                 'train loss': loss_train,
