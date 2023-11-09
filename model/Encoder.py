@@ -8,7 +8,8 @@ class TransformerEncoderBlock(nn.Module):
         dim_model,
         dim_head,
         dim_mlp,
-        n_head
+        n_head,
+        dropout_rate=0.1
     ):
         super().__init__()
         self.dim_model = dim_model
@@ -16,9 +17,11 @@ class TransformerEncoderBlock(nn.Module):
 
         self.layer_norm_attention = nn.LayerNorm(dim_model)
         self.attention = MultiHeadAttention(dim_model, dim_head, dim_head, dim_head, n_head, attention_type="LinearAttention")
+        self.dropout_after_attn = nn.Dropout(p=dropout_rate)
 
         self.layer_norm_mlp = nn.LayerNorm(dim_model)
         self.mlp = FeedForward(dim_model, dim_mlp, dim_model)
+        self.dropout_after_mlp = nn.Dropout(p=dropout_rate)
 
     def forward(
         self,
@@ -31,11 +34,13 @@ class TransformerEncoderBlock(nn.Module):
         x = self.layer_norm_attention(x)
         x = self.attention(x, x, x)
         x += identity
+        x = self.dropout_after_attn(x)
 
         identity = x
         x = self.layer_norm_mlp(x)
         x = self.mlp(x)
         x += identity
+        x = self.dropout_after_mlp(x)
 
         return x
 
@@ -46,12 +51,13 @@ class TransformerEncoder(nn.Module):
         dim_head,
         dim_mlp,
         n_head,
-        depth
+        depth,
+        dropout_rate=0.1
     ):
         super().__init__()
         self.depth = depth
         self.encoder = nn.ModuleList([
-            TransformerEncoderBlock(dim_model, dim_head, dim_mlp, n_head)
+            TransformerEncoderBlock(dim_model, dim_head, dim_mlp, n_head, dropout_rate=dropout_rate)
         for _ in range(depth)])
 
     def forward(

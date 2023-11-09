@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch
 import sys
-sys.path.append("/Users/tora/Desktop/DL/LaTeX_OCR/model")
+sys.path.append("/home/ubuntu/LaTeX_OCR/model")
 from TransformerModule.Embedding import SinusoidPostionalEmbedding, Embedding4Transformer
 from Encoder import TransformerEncoder
 from Decoder import TransformerDecoder
@@ -25,6 +25,7 @@ class ViTLaTeXOCR(nn.Module):
         max_L=100,
         channels=1,
         dim_head=64,
+        dropout_rate=0.1,
         pre_train_word_embedding=False,
         embedding=None
     ):
@@ -47,12 +48,14 @@ class ViTLaTeXOCR(nn.Module):
             nn.Linear(self.patch_dim, dim_emb),
             nn.LayerNorm(dim_emb)
         )
+        self.dropout_after_image_emb = nn.Dropout(p=dropout_rate)
         # Word Embeddings
         self.word_embedding = Embedding4Transformer(dim_emb, vocab_size, max_L, pre_train=pre_train_word_embedding, embedding=embedding)
+        self.dropout_after_word_emb = nn.Dropout(p=dropout_rate)
         # Transformer Encoder
-        self.transformer_encoder = TransformerEncoder(dim_emb, dim_head, dim_mlp, n_head, depth)
+        self.transformer_encoder = TransformerEncoder(dim_emb, dim_head, dim_mlp, n_head, depth, dropout_rate=dropout_rate)
         # Transformer Decoder
-        self.transformer_decoder = TransformerDecoder(dim_emb, dim_head, dim_mlp, n_head, depth)
+        self.transformer_decoder = TransformerDecoder(dim_emb, dim_head, dim_mlp, n_head, depth, dropout_rate=dropout_rate)
 
     def forward(
         self,
@@ -67,12 +70,14 @@ class ViTLaTeXOCR(nn.Module):
                  .permute(1, 0, 2)
         # Embedding
         x = self.image_embedding(x)  # (self.patch_num, n_batch, self.dim_emb)
+        x = self.dropout_after_image_emb(x)
 
         # Transformer Encoder
-        memory = self.transformer_encoder(x)
+        memory = self.transformer_encoder(x) # (self.patch_num, n_batch, self.dim_emb)
 
         # Transformer Decoder
         tgt_emb = self.word_embedding(tgt)
+        tgt_emb = self.dropout_after_word_emb(tgt_emb)
         # tgt_mask = self.generate_mask(tgt_emb).to(tgt_emb.device)
         tgt_out = self.transformer_decoder(
             tgt_emb,
@@ -102,7 +107,7 @@ class ViTLaTeXOCR(nn.Module):
         tgt_in = tgt = torch.full(size=(1, n_batch), fill_value=0).to(memory.device)
         # tgt_mask = torch.tril(torch.ones(self.max_L, self.max_L, dtype=int), diagonal=0)
         # tgt_mask = torch.where(tgt_mask == 1, float(0.0), float("-inf")).to(memory.device)
-        for i in tqdm(range(self.max_L), desc="Auto-regressive Generation", leave=False):
+        for i in range(self.max_L): # tqdm(range(self.max_L), desc="Auto-regressive Generation", leave=False):
             tgt = self.word_embedding.encode(tgt_in)
             tgt = self.transformer_decoder(
                 tgt,

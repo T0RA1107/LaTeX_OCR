@@ -118,10 +118,10 @@ class CausalLinearAttention(nn.Module):
         K = K.reshape(l_key, n_batch, n_head, d_key, 1)
         V = V.reshape(l_value, n_batch, n_head, 1, d_value)
 
-        A = torch.cumsum(K * V, dim=1)  # (l_key, n_batch, n_head, d_key, d_value)
+        A = torch.cumsum(K * V, dim=0)  # (l_key, n_batch, n_head, d_key, d_value)
         A = torch.sum(Q * A, dim=3)  # (l_query, n_batch, n_head, d_value)
 
-        B = torch.cumsum(K, dim=1)  # (l_key, n_batch, n_head, d_key, 1)
+        B = torch.cumsum(K, dim=0)  # (l_key, n_batch, n_head, d_key, 1)
         B = torch.sum(Q * B, dim=3)  # (l_query, n_batch, n_head, 1)
 
         x = A / (B + self.eps)
@@ -185,10 +185,6 @@ class MultiHeadAttention(nn.Module):
         assert(l_key == l_value)
         assert(d_model == self.d_model)
 
-        Q = Q.reshape(l_query * n_batch, d_model)
-        K = K.reshape(l_key * n_batch, d_model)
-        V = V.reshape(l_value * n_batch, d_model)
-
         Q = self.project_query(Q)
         K = self.project_key(K)
         V = self.project_value(V)
@@ -198,7 +194,7 @@ class MultiHeadAttention(nn.Module):
         V = V.reshape(l_value, n_batch, self.n_head, self.d_value)
 
         x = self.attention(Q, K, V, mask=mask)
-        x = x.reshape(l_query * n_batch, self.n_head * self.d_value)
+        x = x.reshape(l_query, n_batch, self.n_head * self.d_value)
         x = self.aggregate(x)
         x = x.reshape(l_query, n_batch, self.d_model)
         return x
