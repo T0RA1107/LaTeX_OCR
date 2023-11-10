@@ -136,6 +136,7 @@ class MultiHeadAttention(nn.Module):
         d_key,
         d_value,
         n_head,
+        dropout_rate=0.1,
         attention_type="ScalarDotProductAttention"
     ):
         super().__init__()
@@ -166,11 +167,13 @@ class MultiHeadAttention(nn.Module):
             in_features=d_model,
             out_features=n_head * d_value
         )
+        self.dropout_attn = nn.Dropout(p=dropout_rate)
         # for aggregate H heads
         self.aggregate =nn.Linear(
             in_features=n_head * d_value,
             out_features=d_model
         )
+        self.dropout_aggregate = nn.Dropout(p=dropout_rate)
 
     def forward(
         self,
@@ -195,6 +198,8 @@ class MultiHeadAttention(nn.Module):
 
         x = self.attention(Q, K, V, mask=mask)
         x = x.reshape(l_query, n_batch, self.n_head * self.d_value)
+        x = self.dropout_attn(x)
+
         x = self.aggregate(x)
-        x = x.reshape(l_query, n_batch, self.d_model)
+        x = self.dropout_aggregate(x)
         return x

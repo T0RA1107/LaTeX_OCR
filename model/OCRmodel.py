@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch
 import sys
-sys.path.append("/home/ubuntu/LaTeX_OCR/model")
+sys.path.append("./model")
 from TransformerModule.Embedding import SinusoidPostionalEmbedding, Embedding4Transformer
 from Encoder import TransformerEncoder
 from Decoder import TransformerDecoder
@@ -90,7 +90,9 @@ class ViTLaTeXOCR(nn.Module):
 
     def generate(
         self,
-        image
+        image,
+        beam_search=False,
+        beam_width=10
     ):
         n_batch, H, W, C = image.shape
         assert self.H == H and self.W == W and self.channels == C, f"Invalid shape of the images: the shape must be ({self.H}, {self.W}, {self.channels}), and yours are ({H}, {W}, {C})"
@@ -104,25 +106,96 @@ class ViTLaTeXOCR(nn.Module):
         # Transformer Encoder
         memory = self.transformer_encoder(x)
 
-        tgt_in = tgt = torch.full(size=(1, n_batch), fill_value=0).to(memory.device)
-        # tgt_mask = torch.tril(torch.ones(self.max_L, self.max_L, dtype=int), diagonal=0)
-        # tgt_mask = torch.where(tgt_mask == 1, float(0.0), float("-inf")).to(memory.device)
-        for i in range(self.max_L): # tqdm(range(self.max_L), desc="Auto-regressive Generation", leave=False):
-            tgt = self.word_embedding.encode(tgt_in)
-            tgt = self.transformer_decoder(
-                tgt,
-                memory,
-                None, # tgt_mask[:i + 1, :i + 1],
-                None
-            )
-            tgt = self.word_embedding.decode(tgt[[-1], :, :])
-            _, tgt = torch.max(tgt, dim=-1)
-            tgt_in = torch.cat([ tgt_in, tgt ], dim=0)
-        tgt_out = tgt_in[1:, :]
-        return tgt_out
+        if beam_search:
+            probs = torch.full(size=(n_batch, beam_width), fill_value=torch.log(torch.tensor(1.0 / beam_width))).to(memory.device)
+            paths = torch.full(size=(1, n_batch, beam_width), fill_value=0).to(memory.device)
+            for _ in range(self.max_L):
+                next_probs = torch.empty(size=(n_batch, 0)).to(memory.device)
+                next_tokens = torch.empty_like(next_probs).to(memory.device)
+                for i in range(beam_width):
+                    tgt = self.word_embedding.encode(paths[:, :, i])
+                    tgt = self.transformer_decoder(
+                        tgt,
+                        memory,
+                        None,
+                        None
+                    )
+                    tgt = self.word_embedding.decode(tgt[-1, :, :])  # (n_batch, V)
+                    p, tgt = tgt.topk(k=beam_width, dim=1)  # (n_batch, beam_width)
+                    log_p = torch.log(p) + probs[:, [i]]
+                    next_probs = torch.concat([ next_probs, log_p ], dim=1)
+                    next_tokens = torch.concat([ next_tokens, tgt ], dim=1)
+                scores, idx = next_probs.topk(k=beam_width, dim=1)
+                probs = scores
+                next_paths = torch.empty(size=(paths.shape[0] + 1, n_batch, beam_width), dtype=torch.long).to(memory.device)
+                for b in range(n_batch):
+                    for w in range(beam_width):
+                        c, next_token_id = idx[b, w] // beam_width, idx[b, w] % beam_width
+                        next_paths[:, b, w] = torch.concat([ paths[:, b, c], next_tokens[b, next_token_id][None, ...] ], dim=0)
+                paths = next_paths
+            res = torch.empty((self.max_L - 1, 0)).to(memory.device)
+            idx = probs.argmax(dim=1)
+            for b in range(n_batch):
+                res = torch.concat([ res, paths[1:, b, idx[b]]])
+            return res
+        else:
+            tgt_in = tgt = torch.full(size=(1, n_batch), fill_value=0).to(memory.device)
+            # tgt_mask = torch.tril(torch.ones(self.max_L, self.max_L, dtype=int), diagonal=0)
+            # tgt_mask = torch.where(tgt_mask == 1, float(0.0), float("-inf")).to(memory.device)
+            for i in range(self.max_L): # tqdm(range(self.max_L), desc="Auto-regressive Generation", leave=False):
+                tgt = self.word_embedding.encode(tgt_in)
+                tgt = self.transformer_decoder(
+                    tgt,
+                    memory,
+                    None, # tgt_mask[:i + 1, :i + 1],
+                    None
+                )
+                tgt = self.word_embedding.decode(tgt[[-1], :, :])
+                _, tgt = torch.max(tgt, dim=-1)
+                tgt_in = torch.cat([ tgt_in, tgt ], dim=0)
+            tgt_out = tgt_in[1:, :]
+            return tgt_out
 
     def generate_mask(self, tgt):
         L_tgt = tgt.shape[0]
         tgt_mask = torch.tril(torch.ones(L_tgt, L_tgt, dtype=int), diagonal=0)
         tgt_mask = torch.where(tgt_mask == 1, float(0.0), float("-inf"))
         return tgt_mask
+
+class BeamPath:
+    def __init__(
+        self,
+        path,  # (l, n_batch)
+        probability # (1, n_batch)
+    ):
+        self.path = path
+        self.probability = probability
+
+    def next_token_probabilities(
+        self,
+        next_prob  # (1, n_batch, V)
+    ):
+        return self.probability[:, :, None] * next_prob
+
+    def update_path(
+        self,
+        next_token,  # (1, n_batch)
+        probability  # (1, n_batch)
+    ):
+        self.path = torch.cat([ self.path, next_token ], dim=0)
+        self.probability = probability
+
+class BeamSearcher:
+    def __init__(self, n_batch, beam_width, device):
+        self.n_batch = n_batch
+        self.beam_width = beam_width
+        self.paths = [BeamPath(torch.full(size=(1, n_batch), fill_value=0).to(device), 1.0 / beam_width) for _ in range(beam_width)]
+
+    def determine_path(
+        self,
+        next_probabilities  # [(1, n_batch, V); beam_width]
+    ):
+        l, n_batch, V = next_probabilities.shape
+        assert l == 1 and n_batch == self.n_batch
+        prob_stack = torch.cat(next_probabilities, dim=2) # (1, n_batch, V * beam_width)
+        prob, idx = torch.topk(prob_stack, k=self.beam_width, dim=-1)
